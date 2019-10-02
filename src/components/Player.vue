@@ -117,6 +117,7 @@ export default {
       let dataArray = new Uint8Array(bufferLength);
       let canvasCtx = this.canvasCtx;
       let canvas = this.canvas;
+      requestAnimationFrame(this.draw);
 
       // Adapt width and height to fit the entire window
       canvasCtx.canvas.width = window.innerWidth;
