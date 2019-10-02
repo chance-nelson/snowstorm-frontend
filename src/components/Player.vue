@@ -54,10 +54,16 @@ export default {
   data: function() {
     return {
       audioCtx: new AudioContext(),
-      value: 50
+      value: 50,
+      radioState: {
+        title: null,
+        artist: null
+      }
     }
   },
   mounted() {
+    this.getRadioState();
+
     this.audioElement = this.$refs["stream"];
     this.audioElement = this.$refs["stream"];
     this.playButton = this.$refs["playPause"];
@@ -80,20 +86,23 @@ export default {
     this.gainNode.connect(this.audioCtx.destination);
 
     this.draw();
-
-    setInterval(function() {
-        this.getRadioState();
-    }.bind(this), 3000);
-
   },
   methods: {
     getRadioState() {
         let response = fetch("http://34.70.62.142/stream/", {method: "GET"})
             .then(response => response.json())
             .then(data => {
-                this.song.innerHTML = data.title;
-                this.artist.innerHTML = data.artist;
+                this.radioState.title = data.title;
+                this.radioState.artist = data.artist;
+
+                this.setRadioLabels();
             });
+    },
+    setRadioLabels() {
+      if (this.radioState.title && this.radioState.artist)  {
+        this.song.innerHTML = this.radioState.title;
+        this.artist.innerHTML = this.radioState.artist;
+      }
     },
     skip() {
         fetch("http://34.70.62.142/stream/skip", {method: "GET"})
