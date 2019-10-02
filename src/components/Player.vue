@@ -58,7 +58,8 @@ export default {
       radioState: {
         title: null,
         artist: null
-      }
+      },
+      checkRadioState: null
     }
   },
   mounted() {
@@ -153,8 +154,6 @@ export default {
       canvasCtx.stroke();
     },
     setVolume(value) {
-      console.log(value)
-      console.log(value / 100);
       this.gainNode.gain.value = value / 100;
     },
     playPause() {
@@ -176,10 +175,14 @@ export default {
 
       if(this.playButton.dataset.playing === "true") {
         this.audioElement.pause();
+        clearInterval(this.checkRadioState);
+
         this.playButton.dataset.playing = 'false';     
         this.playButtonIcon.innerHTML = "play_arrow";
       } else {
         this.audioElement.play();
+        this.checkRadioState = setInterval(this.getRadioState, 3000);
+
         this.playButton.dataset.playing = 'true';
         this.playButtonIcon.innerHTML = "pause";
       }
