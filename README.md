@@ -1,6 +1,6 @@
 # SnowStorm - Frontend
 
-A Vue.js frontend for the SnowStorm internet radio platform
+A Vue.js frontend for the [SnowStorm](https://github.com/chance-nelson/SnowStorm) internet radio platform
 
 ## Getting Started
 
