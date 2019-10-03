@@ -1,11 +1,11 @@
 <template>
   <div class="player">
-    <audio v-bind:src="streamSource" id="stream" ref="stream">
+    <audio :src="streamSource" id="stream" ref="stream">
     </audio>
     <canvas ref="oscilloscope"></canvas>
     <div class="playerControls" ref="playerControls">
       <div class="playPauseControl">
-        <button v-on:click="playPause()" ref="playPause">
+        <button @click="playPause()" ref="playPause">
           <i ref="playPauseIcon" class="material-icons" style="font-size: 10vh; color: white;">play_arrow</i>
         </button>
       </div>
@@ -15,7 +15,7 @@
             <i class="material-icons" style="color: white;">volume_mute</i>
           </div>
           <div class="volume">
-            <vue-slider ref="volume" v-model="value" v-on:change="setVolume(value)" v-bind:min="volumeMin" v-bind:max="volumeMax"/>
+            <vue-slider ref="volume" v-model="value" @change="setVolume(value)" :min="volumeMin" :max="volumeMax"/>
           </div>
           <div class="volume-icon">
             <i class="material-icons" style="color: white;">volume_up</i>
@@ -27,7 +27,7 @@
         </div>
       </div>
       <div class="skipControl">
-        <button v-on:click="skip()" ref="playPause">
+        <button @click="skip()" ref="playPause">
           <i class="material-icons" style="font-size: 10vh; color: white;">fast_forward</i>
         </button>
       </div>
@@ -47,11 +47,9 @@ export default {
   },
   props: {
     streamSource: String,
-    streamMimeType: String,
-    volumeMax: 100,
-    volumeMin: 0
+    streamMimeType: String
   },
-  data: function() {
+  data() {
     return {
       audioCtx: new AudioContext(),
       value: 50,
@@ -59,7 +57,9 @@ export default {
         title: null,
         artist: null
       },
-      checkRadioState: null
+      checkRadioState: null,
+      volumeMax: 100,
+      volumeMin: 0
     }
   },
   mounted() {
@@ -89,15 +89,18 @@ export default {
     this.draw();
   },
   methods: {
-    getRadioState() {
-        let response = fetch("http://34.70.62.142/stream/", {method: "GET"})
-            .then(response => response.json())
-            .then(data => {
-                this.radioState.title = data.title;
-                this.radioState.artist = data.artist;
+    async getRadioState() {
+      try {
+        let response = await fetch("http://34.70.62.142/stream/", {method: "GET"});
+        let data = await response.json();
 
-                this.setRadioLabels();
-            });
+        this.radioState.title = data.title;
+        this.radioState.artist = data.artist;
+        this.setRadioLabels();
+      } catch(error) {
+        // eslint-disable-next-line
+        console.error(`Error from fetching ${error}`);
+      }
     },
     setRadioLabels() {
       if (this.radioState.title && this.radioState.artist)  {
@@ -108,13 +111,13 @@ export default {
     skip() {
         fetch("http://34.70.62.142/stream/skip", {method: "GET"})
     },
-    draw: function() {
+    draw() {
       this.analyser.fftSize = 1024;
       let bufferLength = this.analyser.frequencyBinCount;
       let dataArray = new Uint8Array(bufferLength);
       let canvasCtx = this.canvasCtx;
       let canvas = this.canvas;
-      let drawVisual = requestAnimationFrame(this.draw);
+      requestAnimationFrame(this.draw);
 
       // Adapt width and height to fit the entire window
       canvasCtx.canvas.width = window.innerWidth;
@@ -133,13 +136,13 @@ export default {
 
       canvasCtx.beginPath();
 
-      var sliceWidth = WIDTH * 1.0 / bufferLength;
-      var x = 0;
+      let sliceWidth = WIDTH * 1.0 / bufferLength;
+      let x = 0;
 
-      for(var i = 0; i < bufferLength; i++) {
+      for(let i = 0; i < bufferLength; i++) {
   
-        var v = (dataArray[i]) / (128.0);
-        var y = ((v) * (HEIGHT/2));
+        let v = (dataArray[i]) / (128.0);
+        let y = ((v) * (HEIGHT/2));
 
         if(i === 0) {
           canvasCtx.moveTo(x, y);
@@ -170,26 +173,23 @@ export default {
       }
 
       if(!this.volume) {
-        this.volume = this.$refs["colume"];
+        this.volume = this.$refs["volume"];
       }
 
-      if(this.playButton.dataset.playing === "true") {
+      if(this.playButton.dataset.playing) {
         this.audioElement.pause();
-        clearInterval(this.checkRadioState);
-
-        this.playButton.dataset.playing = 'false';     
+        this.playButton.dataset.playing = false;
         this.playButtonIcon.innerHTML = "play_arrow";
+        clearInterval(this.checkRadioState);
       } else {
         this.audioElement.play();
-        this.checkRadioState = setInterval(this.getRadioState, 3000);
-
-        this.playButton.dataset.playing = 'true';
+        this.playButton.dataset.playing = true;
         this.playButtonIcon.innerHTML = "pause";
+        this.checkRadioState = setInterval(this.getRadioState, 3000);
       }
     }
   }
 }
-
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
