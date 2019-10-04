@@ -103,10 +103,12 @@ export default {
       }
     },
     setRadioLabels() {
-      if (this.radioState.title && this.radioState.artist)  {
+      if(this.radioState.title && this.radioState.artist) {
         this.song.innerHTML = this.radioState.title;
         this.artist.innerHTML = this.radioState.artist;
       }
+
+      document.title = `${this.radioState.artist}: ${this.radioState.title}`;
     },
     skip() {
         fetch("http://34.70.62.142/stream/skip", {method: "GET"})
