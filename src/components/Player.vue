@@ -9,7 +9,7 @@
             ref="playPauseIcon"
             class="material-icons"
             style="font-size: 10vh; color: white;"
-          >play_arrow</i>
+          >{{ playing ? 'pause' : 'play_arrow' }}</i>
         </button>
       </div>
       <div class="songInfoControl">
@@ -61,9 +61,9 @@ export default {
       value: 50,
       radioState: {
         title: "",
-        artist: "",
-        playing: false
+        artist: ""
       },
+      playing: false,
       checkRadioState: null,
       volumeMax: 100,
       volumeMin: 0
@@ -162,15 +162,13 @@ export default {
         this.audioCtx.resume();
       }
 
-      if (this.playButton.dataset.playing) {
+      if (this.playing) {
         this.audioElement.pause();
-        this.playButton.dataset.playing = false;
-        this.playButtonIcon.innerHTML = "play_arrow";
+        this.playing = false;
         clearInterval(this.checkRadioState);
       } else {
         this.audioElement.play();
-        this.playButton.dataset.playing = true;
-        this.playButtonIcon.innerHTML = "pause";
+        this.playing = true;
         this.checkRadioState = setInterval(this.getRadioState, 3000);
       }
     }
