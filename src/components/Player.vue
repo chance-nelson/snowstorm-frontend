@@ -73,11 +73,8 @@ export default {
     this.getRadioState();
 
     this.audioElement = this.$refs["stream"];
-    this.playButton = this.$refs["playPause"];
-    this.volume = this.$refs["volume"];
     this.canvas = this.$refs["oscilloscope"];
     this.canvasCtx = this.canvas.getContext("2d");
-    this.playButtonIcon = this.$refs["playPauseIcon"];
 
     this.audioElement.crossOrigin = "anonymous";
 
