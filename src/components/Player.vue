@@ -1,12 +1,15 @@
 <template>
   <div class="player">
-    <audio :src="streamSource" id="stream" ref="stream">
-    </audio>
+    <audio :src="streamSource" id="stream" ref="stream"></audio>
     <canvas ref="oscilloscope"></canvas>
     <div class="playerControls" ref="playerControls">
       <div class="playPauseControl">
         <button @click="playPause()" ref="playPause">
-          <i ref="playPauseIcon" class="material-icons" style="font-size: 10vh; color: white;">play_arrow</i>
+          <i
+            ref="playPauseIcon"
+            class="material-icons"
+            style="font-size: 10vh; color: white;"
+          >play_arrow</i>
         </button>
       </div>
       <div class="songInfoControl">
@@ -15,16 +18,20 @@
             <i class="material-icons" style="color: white;">volume_mute</i>
           </div>
           <div class="volume">
-            <vue-slider ref="volume" v-model="value" @change="setVolume(value)" :min="volumeMin" :max="volumeMax"/>
+            <vue-slider
+              ref="volume"
+              v-model="value"
+              @change="setVolume(value)"
+              :min="volumeMin"
+              :max="volumeMax"
+            />
           </div>
           <div class="volume-icon">
             <i class="material-icons" style="color: white;">volume_up</i>
           </div>
         </div>
-        <div ref="songTitle" class="songTitle">
-        </div>
-        <div ref="artistName" class="artistName">
-        </div>
+        <div ref="songTitle" class="songTitle"></div>
+        <div ref="artistName" class="artistName"></div>
       </div>
       <div class="skipControl">
         <button @click="skip()" ref="playPause">
@@ -36,12 +43,11 @@
 </template>
 
 <script>
-
-import VueSlider from 'vue-slider-component';
-import 'vue-slider-component/theme/material.css';
+import VueSlider from "vue-slider-component";
+import "vue-slider-component/theme/material.css";
 
 export default {
-  name: 'Player',
+  name: "Player",
   components: {
     VueSlider
   },
@@ -60,7 +66,7 @@ export default {
       checkRadioState: null,
       volumeMax: 100,
       volumeMin: 0
-    }
+    };
   },
   mounted() {
     this.getRadioState();
@@ -91,19 +97,21 @@ export default {
   methods: {
     async getRadioState() {
       try {
-        let response = await fetch("http://34.70.62.142/stream/", {method: "GET"});
+        let response = await fetch("http://34.70.62.142/stream/", {
+          method: "GET"
+        });
         let data = await response.json();
 
         this.radioState.title = data.title;
         this.radioState.artist = data.artist;
         this.setRadioLabels();
-      } catch(error) {
+      } catch (error) {
         // eslint-disable-next-line
         console.error(`Error from fetching ${error}`);
       }
     },
     setRadioLabels() {
-      if(this.radioState.title && this.radioState.artist) {
+      if (this.radioState.title && this.radioState.artist) {
         this.song.innerHTML = this.radioState.title;
         this.artist.innerHTML = this.radioState.artist;
       }
@@ -111,7 +119,7 @@ export default {
       document.title = `${this.radioState.artist}: ${this.radioState.title}`;
     },
     skip() {
-        fetch("http://34.70.62.142/stream/skip", {method: "GET"})
+      fetch("http://34.70.62.142/stream/skip", { method: "GET" });
     },
     draw() {
       this.analyser.fftSize = 1024;
@@ -126,27 +134,26 @@ export default {
       canvasCtx.canvas.height = window.innerHeight;
 
       this.analyser.getByteTimeDomainData(dataArray);
-      
+
       let WIDTH = canvasCtx.canvas.width;
       let HEIGHT = canvasCtx.canvas.height;
 
-      canvasCtx.fillStyle = 'rgb(0, 0, 0)';
+      canvasCtx.fillStyle = "rgb(0, 0, 0)";
       canvasCtx.fillRect(0, 0, WIDTH, HEIGHT);
 
       canvasCtx.lineWidth = 2;
-      canvasCtx.strokeStyle = 'rgb(0, 255, 0)';
+      canvasCtx.strokeStyle = "rgb(0, 255, 0)";
 
       canvasCtx.beginPath();
 
-      let sliceWidth = WIDTH * 1.0 / bufferLength;
+      let sliceWidth = (WIDTH * 1.0) / bufferLength;
       let x = 0;
 
-      for(let i = 0; i < bufferLength; i++) {
-  
-        let v = (dataArray[i]) / (128.0);
-        let y = ((v) * (HEIGHT/2));
+      for (let i = 0; i < bufferLength; i++) {
+        let v = dataArray[i] / 128.0;
+        let y = v * (HEIGHT / 2);
 
-        if(i === 0) {
+        if (i === 0) {
           canvasCtx.moveTo(x, y);
         } else {
           canvasCtx.lineTo(x, y);
@@ -155,30 +162,30 @@ export default {
         x += sliceWidth;
       }
 
-      canvasCtx.lineTo(canvas.width, canvas.height/2);
+      canvasCtx.lineTo(canvas.width, canvas.height / 2);
       canvasCtx.stroke();
     },
     setVolume(value) {
       this.gainNode.gain.value = value / 100;
     },
     playPause() {
-      if(this.audioCtx.state === "suspended") {
+      if (this.audioCtx.state === "suspended") {
         this.audioCtx.resume();
       }
 
-      if(!this.audioElement) {
+      if (!this.audioElement) {
         this.audioElement = this.$refs["stream"];
       }
 
-      if(!this.playButton) {
+      if (!this.playButton) {
         this.playButton = this.$refs["playPause"];
       }
 
-      if(!this.volume) {
+      if (!this.volume) {
         this.volume = this.$refs["volume"];
       }
 
-      if(this.playButton.dataset.playing) {
+      if (this.playButton.dataset.playing) {
         this.audioElement.pause();
         this.playButton.dataset.playing = false;
         this.playButtonIcon.innerHTML = "play_arrow";
@@ -191,94 +198,94 @@ export default {
       }
     }
   }
-}
+};
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
 audio {
-    display: none;
+  display: none;
 }
 
 canvas {
-    width: 100%;
-    height: 100%;
-    left: 0;
-    top: 0;
-    overflow: hidden;
-    position: fixed;
-    z-index: 1;
+  width: 100%;
+  height: 100%;
+  left: 0;
+  top: 0;
+  overflow: hidden;
+  position: fixed;
+  z-index: 1;
 }
 
 button {
-    background-color: Transparent;
-    background-repeat: no-repeat;
-    border: none;
-    cursor:pointer;
-    overflow: hidden;
-    outline:none;
+  background-color: Transparent;
+  background-repeat: no-repeat;
+  border: none;
+  cursor: pointer;
+  overflow: hidden;
+  outline: none;
 }
 
 .playPauseControl {
-    display: flex;
-    backdrop-filter: blur(10px);
-    text-align: center;
-    margin-right: 5%;
+  display: flex;
+  backdrop-filter: blur(10px);
+  text-align: center;
+  margin-right: 5%;
 }
 
 .skipControl {
-    display: flex;
-    backdrop-filter: blur(10px);
-    text-align: center;
-    margin-left: 5%;
+  display: flex;
+  backdrop-filter: blur(10px);
+  text-align: center;
+  margin-left: 5%;
 }
 
 .songInfoControl {
-    display: inline-block;
-    backdrop-filter: blur(10px);
-    text-align: left;
-    white-space: nowrap;
-    min-width: 80%;
-    padding: 2%;
+  display: inline-block;
+  backdrop-filter: blur(10px);
+  text-align: left;
+  white-space: nowrap;
+  min-width: 80%;
+  padding: 2%;
 }
 
 .volume {
-    width: 80%;
+  width: 80%;
 }
 
 .volume-container {
-    display: flex; 
-    height: 20%;
+  display: flex;
+  height: 20%;
 }
 
 .volume-icon {
-    width: 20%;
-    text-align: center;
+  width: 20%;
+  text-align: center;
 }
 
 .songTitle {
-    font-size: 6vh;
-    height: 60%;
+  font-size: 6vh;
+  height: 60%;
 }
 
 .artistName {
-    height: 20%;
-    font-size: 2vh;
+  height: 20%;
+  font-size: 2vh;
 }
 
 .playerControls {
-    display: flex;
-    flex-flow: row nowrap;
-    position: absolute;
-    background-color: Transparent;
-    color: white;
-    z-index: 2;
-    margin: auto;
-    padding: 5%;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    justify-content: center;
-    align-items: center;
+  display: flex;
+  flex-flow: row nowrap;
+  position: absolute;
+  background-color: Transparent;
+  color: white;
+  z-index: 2;
+  margin: auto;
+  padding: 5%;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  justify-content: center;
+  align-items: center;
 }
 </style>
