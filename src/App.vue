@@ -1,25 +1,34 @@
 <template>
   <div id="app">
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" crossorigin="anonymous">
-    <Player streamSource="http://34.70.62.142/stream/stream.mp3" streamMimeType="audio/mpeg"/>
+    <link
+      href="https://fonts.googleapis.com/icon?family=Material+Icons"
+      rel="stylesheet"
+      crossorigin="anonymous"
+    />
+    <Player :streamSource="source" streamMimeType="audio/mpeg" />
   </div>
 </template>
 
 <script>
 //import HelloWorld from './components/HelloWorld.vue'
-import Player from './components/Player.vue'
+import Player from "./components/Player.vue";
 
 export default {
-  name: 'app',
+  name: "app",
   components: {
     Player
+  },
+  computed: {
+    source() {
+      return `${process.env.VUE_APP_API}stream/stream.mp3`;
+    }
   }
-}
+};
 </script>
 
 <style>
 #app {
-  font-family: 'Avenir', Helvetica, Arial, sans-serif;
+  font-family: "Avenir", Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;

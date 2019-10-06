@@ -30,8 +30,8 @@
             <i class="material-icons" style="color: white;">volume_up</i>
           </div>
         </div>
-        <div ref="songTitle" class="songTitle"></div>
-        <div ref="artistName" class="artistName"></div>
+        <div ref="songTitle" class="songTitle">{{ radioState.title }}</div>
+        <div ref="artistName" class="artistName">{{ radioState.artist }}</div>
       </div>
       <div class="skipControl">
         <button @click="skip()" ref="playPause">
@@ -60,8 +60,9 @@ export default {
       audioCtx: new AudioContext(),
       value: 50,
       radioState: {
-        title: null,
-        artist: null
+        title: "",
+        artist: "",
+        playing: false
       },
       checkRadioState: null,
       volumeMax: 100,
@@ -72,15 +73,11 @@ export default {
     this.getRadioState();
 
     this.audioElement = this.$refs["stream"];
-    this.audioElement = this.$refs["stream"];
     this.playButton = this.$refs["playPause"];
     this.volume = this.$refs["volume"];
     this.canvas = this.$refs["oscilloscope"];
     this.canvasCtx = this.canvas.getContext("2d");
     this.playButtonIcon = this.$refs["playPauseIcon"];
-
-    this.song = this.$refs["songTitle"];
-    this.artist = this.$refs["artistName"];
 
     this.audioElement.crossOrigin = "anonymous";
 
@@ -97,29 +94,21 @@ export default {
   methods: {
     async getRadioState() {
       try {
-        let response = await fetch("http://34.70.62.142/stream/", {
+        let response = await fetch(`${process.env.VUE_APP_API}stream/`, {
           method: "GET"
         });
         let data = await response.json();
 
         this.radioState.title = data.title;
         this.radioState.artist = data.artist;
-        this.setRadioLabels();
+        document.title = `${this.radioState.artist}: ${this.radioState.title}`;
       } catch (error) {
         // eslint-disable-next-line
         console.error(`Error from fetching ${error}`);
       }
     },
-    setRadioLabels() {
-      if (this.radioState.title && this.radioState.artist) {
-        this.song.innerHTML = this.radioState.title;
-        this.artist.innerHTML = this.radioState.artist;
-      }
-
-      document.title = `${this.radioState.artist}: ${this.radioState.title}`;
-    },
     skip() {
-      fetch("http://34.70.62.142/stream/skip", { method: "GET" });
+      fetch(`${process.env.VUE_APP_API}stream/skip`, { method: "GET" });
     },
     draw() {
       this.analyser.fftSize = 1024;
@@ -171,18 +160,6 @@ export default {
     playPause() {
       if (this.audioCtx.state === "suspended") {
         this.audioCtx.resume();
-      }
-
-      if (!this.audioElement) {
-        this.audioElement = this.$refs["stream"];
-      }
-
-      if (!this.playButton) {
-        this.playButton = this.$refs["playPause"];
-      }
-
-      if (!this.volume) {
-        this.volume = this.$refs["volume"];
       }
 
       if (this.playButton.dataset.playing) {
